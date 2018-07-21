@@ -1,0 +1,11 @@
+# ...
+  srapicomp:
+    image: sygintest # A container that exposes an API to show its IP address
+    expose:
+      - "8001"
+    environment:
+      - RUNPORT=8001
+    labels:
+      - "traefik.api.frontend.rule=Host:api.docker.localhost"
+      - "traefik.api.backend=ginapi"
+      - "traefik.api.port=8001"

@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <script type = "text/javascript">
+
+        let wsRef;
+
+        // function wireHandlers(){
+        //     let input = document.getElementById("message");
+        //
+        //     input.addEventListener("keyup", function(event) {
+        //         event.preventDefault();
+        //         if (event.key === 'Enter') {
+        //             document.getElementById("send").click();
+        //         }
+        //     });
+        // }
+
+        function WebSocketConnect() {
+            if("WebSocket" in window) {
+                let ws = new WebSocket("ws://192.168.99.100:31410/ws");
+
+                ws.onopen = function(){
+                    console.log("Websocket open.");
+                    ws.send("hello from client");
+                    wsRef = ws;
+                };
+
+                ws.onmessage = function(msg) {
+                    let msgData = msg.data;
+                    console.log("Message Received: " + msgData)
+                };
+
+                ws.onclose = function(){
+                    console.log("WebSocket closed.")
+                };
+
+            } else {
+                console.log("Browser does not support sockets.")
+            }
+        }
+
+        function SendMessage(){
+            let msgBox = document.getElementById("message");
+            wsRef.send(msgBox.value)
+        }
+
+        function RestAPI_GET(){
+            let req = new XMLHttpRequest();
+            let url = document.getElementById("restapiaddr").value;
+            console.log("REST GET @ ", url);
+            req.open("GET", url, true);
+            req.onload = function (e) {
+                if (req.readyState === 4 && req.status === 200) {
+                    document.getElementById("restapi_resp").value = req.responseText;
+                } else {
+                    console.log(req.statusText);
+                }
+            };
+            req.send(null)
+        }
+    </script>
+</head>
+
+<body>
+<div id="restapi">
+    <label for="restapiaddr">Rest Addr</label>
+    <input id="restapiaddr" value="http://api.docker.localhost:8081" />
+    <input id="restapi_get" type="button" onclick="RestAPI_GET()" value="Send"/>
+    <br />
+    <input id="restapi_resp" style="width:300px" />
+</div>
+
+<div id="sse">
+    <label for="callerID">CallerID</label>
+    <input id="callerID" /><br />
+    <a href="javascript:WebSocketConnect()">Open Socket</a><br />
+    <label for="message">Message</label>
+    <input id="message" />
+    <input id="send" type="button" onclick="SendMessage()" value="Send"/>
+</div>
+</body>
+</html>
