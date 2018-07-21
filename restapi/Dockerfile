@@ -1,6 +1,6 @@
 FROM alpine:3.7
 
-COPY ./main /bin/main
+COPY ./main /bin/
 
 EXPOSE 8001
 

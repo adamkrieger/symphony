@@ -19,7 +19,7 @@
 
         function WebSocketConnect() {
             if("WebSocket" in window) {
-                let ws = new WebSocket("ws://192.168.99.100:31410/ws");
+                let ws = new WebSocket("ws://localhost:8053/ws");
 
                 ws.onopen = function(){
                     console.log("Websocket open.");
