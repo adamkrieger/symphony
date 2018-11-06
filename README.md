@@ -19,7 +19,7 @@ Steps
    - `http://api.docker.localhost:8081` becomes sample rest api
    - Test with `client.html - Balanced Rest API - Send`
    - Test a few times to watch the balancer cycle
-3. `/websockets/compose-up.sh` in a terminal
+3. `/websockets/compose-single.sh` in a terminal
    - `ws://confcall.docker.localhost:8082` becomes confcall socket
    - Test with `client.html - ConfCall Dialer - Open Socket / Send`
-   - *Currently Connects to Random Call*
+   - *Currently Connects to One Call*

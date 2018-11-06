@@ -1,9 +1,8 @@
 package confcall
 
 import (
-	"github.com/adamkrieger/symphony/common"
-	"github.com/adamkrieger/symphony/websockets/caller"
-	"github.com/adamkrieger/symphony/websockets/contracts"
+	"github.com/adamkrieger/symphony/quickconf/caller"
+	"github.com/adamkrieger/symphony/quickconf/contracts"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -16,9 +15,9 @@ type confCall struct {
 	newCallerChan chan caller.Caller
 }
 
-func NewConfCall() contracts.ConfCall {
+func NewConfCall(newCallID string) contracts.ConfCall {
 	retConfCall := &confCall{
-		callID:        string(common.RandASCIIBytes(6)),
+		callID:        newCallID,
 		callers:       make(map[string]caller.Caller, 50),
 		broadcastChan: make(chan string, 50),
 		newCallerChan: make(chan caller.Caller, 50),
@@ -30,8 +29,8 @@ func NewConfCall() contracts.ConfCall {
 	return retConfCall
 }
 
-func (conference *confCall) AddToCall(conn *websocket.Conn) {
-	sessionID := string(common.RandASCIIBytes(6))
+func (conference *confCall) AddToCall(callerID string, conn *websocket.Conn) {
+	sessionID := callerID
 
 	newCaller := caller.ConnectCaller(sessionID, conn)
 
@@ -80,9 +79,9 @@ func (conference *confCall) listenToNewCaller(newCaller caller.Caller) {
 
 func (conference *confCall) printStatusRepeatedly() {
 	for {
-		msg := time.Now().String() + " PING"
+		msg := time.Now().String() + " CALLID: " + conference.callID
 		conference.broadcastChan <- msg
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }

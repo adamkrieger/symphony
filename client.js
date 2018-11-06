@@ -18,7 +18,15 @@ function WebSocketConnect() {
 
         ws.onopen = function(){
             console.log("Websocket open.");
-            ws.send("hello from client");
+
+            console.log("cookie: " + ws.cookie);
+
+            let callerIDInput = document.getElementById("callerID").value;
+            ws.send(callerIDInput);
+
+            let callIDInput = document.getElementById("callID").value;
+            ws.send(callIDInput);
+
             wsRef = ws;
         };
 

@@ -7,5 +7,7 @@ type SwitchBoard interface {
 }
 
 type ConfCall interface {
-	AddToCall(conn *websocket.Conn)
+	AddToCall(callerID string, conn *websocket.Conn)
 }
+
+type NewCallHandler func(conn *websocket.Conn)

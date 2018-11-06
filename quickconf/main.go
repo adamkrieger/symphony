@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/adamkrieger/symphony/websockets/contracts"
-	"github.com/adamkrieger/symphony/websockets/switchboard"
+	"github.com/adamkrieger/symphony/quickconf/contracts"
+	"github.com/adamkrieger/symphony/quickconf/switchboard"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -14,22 +14,22 @@ func main() {
 
 	mainSwitchboard := switchboard.NewSwitchboard()
 
-	go launchSocketListener(mainSwitchboard)
+	go launchSocketListener(mainSwitchboard.HandleNewSocketConnection)
 
 	waitChan := make(chan interface{})
 	<-waitChan
 }
 
-func launchSocketListener(swboard contracts.SwitchBoard) {
+func launchSocketListener(newSocketHandler contracts.NewCallHandler) {
 	socketUpgrader := &websocket.Upgrader{
 		CheckOrigin:     alwaysAccept,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 
-	socketHandler := buildSocketHandler(swboard, socketUpgrader)
+	wsEndpointHandler := buildWSEndpointHandler(newSocketHandler, socketUpgrader)
 
-	http.HandleFunc("/ws", socketHandler)
+	http.HandleFunc("/ws", wsEndpointHandler)
 	port := ":" + os.Getenv("RUNPORT")
 
 	log.Println("Launching Socket Handler at ", port)
@@ -40,14 +40,14 @@ func launchSocketListener(swboard contracts.SwitchBoard) {
 	}
 }
 
-func buildSocketHandler(swboard contracts.SwitchBoard, upgrader *websocket.Upgrader) func(w http.ResponseWriter, r *http.Request) {
+func buildWSEndpointHandler(newSocketHandler contracts.NewCallHandler, upgrader *websocket.Upgrader) func(w http.ResponseWriter, r *http.Request) {
 	return func(respWriter http.ResponseWriter, req *http.Request) {
 		socket, upgradeErr := upgrader.Upgrade(respWriter, req, nil)
 		if upgradeErr != nil {
 			http.NotFound(respWriter, req)
 		}
 
-		swboard.HandleNewSocketConnection(socket)
+		newSocketHandler(socket)
 	}
 }
 
