@@ -22,7 +22,7 @@
 # Optional
 # Default: ["http"]
 #
-# defaultEntryPoints = ["http", "https"]
+defaultEntryPoints = ["http", "ws"]
 
 ################################################################
 # Entrypoints configuration
@@ -35,6 +35,8 @@
 [entryPoints]
     [entryPoints.http]
     address = ":80"
+    [entryPoints.ws]
+    address = ":9000"
 
 ################################################################
 # Traefik logs configuration

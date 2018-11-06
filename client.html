@@ -2,77 +2,22 @@
 
 <html>
 <head>
-    <script type = "text/javascript">
-
-        let wsRef;
-
-        // function wireHandlers(){
-        //     let input = document.getElementById("message");
-        //
-        //     input.addEventListener("keyup", function(event) {
-        //         event.preventDefault();
-        //         if (event.key === 'Enter') {
-        //             document.getElementById("send").click();
-        //         }
-        //     });
-        // }
-
-        function WebSocketConnect() {
-            if("WebSocket" in window) {
-                let ws = new WebSocket("ws://localhost:8053/ws");
-
-                ws.onopen = function(){
-                    console.log("Websocket open.");
-                    ws.send("hello from client");
-                    wsRef = ws;
-                };
-
-                ws.onmessage = function(msg) {
-                    let msgData = msg.data;
-                    console.log("Message Received: " + msgData)
-                };
-
-                ws.onclose = function(){
-                    console.log("WebSocket closed.")
-                };
-
-            } else {
-                console.log("Browser does not support sockets.")
-            }
-        }
-
-        function SendMessage(){
-            let msgBox = document.getElementById("message");
-            wsRef.send(msgBox.value)
-        }
-
-        function RestAPI_GET(){
-            let req = new XMLHttpRequest();
-            let url = document.getElementById("restapiaddr").value;
-            console.log("REST GET @ ", url);
-            req.open("GET", url, true);
-            req.onload = function (e) {
-                if (req.readyState === 4 && req.status === 200) {
-                    document.getElementById("restapi_resp").value = req.responseText;
-                } else {
-                    console.log(req.statusText);
-                }
-            };
-            req.send(null)
-        }
-    </script>
+    <script type="application/javascript" src="client.js" ></script>
+    <link rel="stylesheet" href="client.css" />
 </head>
 
 <body>
 <div id="restapi">
+    <h1>Balanced Rest API</h1>
     <label for="restapiaddr">Rest Addr</label>
-    <input id="restapiaddr" value="http://api.docker.localhost:8081" />
+    <input id="restapiaddr" class="addrinput" value="http://api.docker.localhost:8081" />
     <input id="restapi_get" type="button" onclick="RestAPI_GET()" value="Send"/>
     <br />
-    <input id="restapi_resp" style="width:300px" />
+    <input id="restapi_resp" />
 </div>
 
 <div id="sse">
+    <h1>ConfCall Dialer</h1>
     <label for="callerID">CallerID</label>
     <input id="callerID" /><br />
     <a href="javascript:WebSocketConnect()">Open Socket</a><br />

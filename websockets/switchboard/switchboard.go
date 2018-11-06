@@ -1,21 +1,24 @@
 package switchboard
 
 import (
-	"github.com/adamkrieger/symphony/websockets/contracts"
+	"github.com/adamkrieger/symphony/common"
 	"github.com/adamkrieger/symphony/websockets/confcall"
+	"github.com/adamkrieger/symphony/websockets/contracts"
 	"github.com/gorilla/websocket"
 	"log"
 )
 
 type switchboard struct {
-	monocall contracts.ConfCall
+	switchboardID string
+	monocall      contracts.ConfCall
 }
 
 func NewSwitchboard() contracts.SwitchBoard {
 	singleCall := confcall.NewConfCall()
 
 	retSB := &switchboard{
-		monocall:singleCall,
+		switchboardID: string(common.RandASCIIBytes(6)),
+		monocall:      singleCall,
 	}
 
 	return retSB

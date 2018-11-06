@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
-	"net/http"
-	"log"
-	"os"
-	"github.com/adamkrieger/symphony/websockets/switchboard"
 	"github.com/adamkrieger/symphony/websockets/contracts"
+	"github.com/adamkrieger/symphony/websockets/switchboard"
+	"github.com/gorilla/websocket"
+	"log"
+	"net/http"
+	"os"
 )
 
-func main(){
+func main() {
 	log.Println("Starting Switchboard")
 
 	mainSwitchboard := switchboard.NewSwitchboard()
@@ -30,9 +30,9 @@ func launchSocketListener(swboard contracts.SwitchBoard) {
 	socketHandler := buildSocketHandler(swboard, socketUpgrader)
 
 	http.HandleFunc("/ws", socketHandler)
-	port := ":8053"
+	port := ":" + os.Getenv("RUNPORT")
 
-	log.Println("Launching Socket Handler at :8053")
+	log.Println("Launching Socket Handler at ", port)
 
 	serveErr := http.ListenAndServe(port, nil)
 	if serveErr != nil {

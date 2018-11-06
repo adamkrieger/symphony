@@ -1,0 +1,11 @@
+# ...
+  srapicomp:
+    image: confcall
+    expose:
+      - "8002"
+    environment:
+      - RUNPORT=8002
+    labels:
+      - "traefik.api.frontend.rule=Host:confcall.docker.localhost"
+      - "traefik.api.backend=gosocket"
+      - "traefik.api.port=8002"

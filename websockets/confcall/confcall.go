@@ -1,27 +1,31 @@
 package confcall
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/adamkrieger/symphony/websockets/contracts"
-	"github.com/adamkrieger/symphony/websockets/caller"
 	"github.com/adamkrieger/symphony/common"
+	"github.com/adamkrieger/symphony/websockets/caller"
+	"github.com/adamkrieger/symphony/websockets/contracts"
+	"github.com/gorilla/websocket"
 	"log"
+	"time"
 )
 
 type confCall struct {
-	callers map[string]caller.Caller
+	callID        string
+	callers       map[string]caller.Caller
 	broadcastChan chan string
 	newCallerChan chan caller.Caller
 }
 
 func NewConfCall() contracts.ConfCall {
 	retConfCall := &confCall{
+		callID:        string(common.RandASCIIBytes(6)),
 		callers:       make(map[string]caller.Caller, 50),
-		broadcastChan: make(chan string),
-		newCallerChan: make(chan caller.Caller),
+		broadcastChan: make(chan string, 50),
+		newCallerChan: make(chan caller.Caller, 50),
 	}
 
 	go retConfCall.startRouting()
+	go retConfCall.printStatusRepeatedly()
 
 	return retConfCall
 }
@@ -35,19 +39,27 @@ func (conference *confCall) AddToCall(conn *websocket.Conn) {
 }
 
 func (conference *confCall) startRouting() {
-	select {
-	case newCaller := <-conference.newCallerChan:
-		conference.callers[newCaller.SessionID()] = newCaller
-		go conference.listenToNewCaller(newCaller)
+	for {
+		select {
+		case newCaller := <-conference.newCallerChan:
+			conference.callers[newCaller.SessionID()] = newCaller
+			go conference.listenToNewCaller(newCaller)
 
-		log.Println("caller ", newCaller.SessionID(), " added")
+			welcomeMsg := "welcome to callID " + conference.callID + ", your sessionID is " + newCaller.SessionID()
+			newCaller.ToCaller() <- welcomeMsg
 
-	case broadcastMsg := <-conference.broadcastChan:
-		for sessionID, eachCaller := range conference.callers {
-			if !eachCaller.Disconnecting() {
-				eachCaller.ToCaller() <- broadcastMsg
-			} else {
-				delete(conference.callers, sessionID)
+			log.Println("caller added: ", newCaller.SessionID())
+
+		case broadcastMsg := <-conference.broadcastChan:
+			for sessionID, eachCaller := range conference.callers {
+				if !eachCaller.Disconnecting() {
+					eachCaller.ToCaller() <- broadcastMsg
+					log.Printf("msg send to %s: %s", sessionID, broadcastMsg)
+				} else {
+					delete(conference.callers, sessionID)
+
+					log.Println("caller removed: ", sessionID)
+				}
 			}
 		}
 	}
@@ -63,5 +75,14 @@ func (conference *confCall) listenToNewCaller(newCaller caller.Caller) {
 				return
 			}
 		}
+	}
+}
+
+func (conference *confCall) printStatusRepeatedly() {
+	for {
+		msg := time.Now().String() + " PING"
+		conference.broadcastChan <- msg
+
+		time.Sleep(1 * time.Second)
 	}
 }
